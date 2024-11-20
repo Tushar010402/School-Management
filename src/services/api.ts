@@ -146,4 +146,24 @@ export const adminAPI = {
   },
 };
 
+// Announcement API
+export const announcementAPI = {
+  getAnnouncements: async (params?: any) => {
+    const response = await api.get('/announcements', { params });
+    return response.data;
+  },
+  createAnnouncement: async (data: any) => {
+    const response = await api.post('/announcements', data);
+    return response.data;
+  },
+  updateAnnouncement: async (id: number, data: any) => {
+    const response = await api.put(`/announcements/${id}`, data);
+    return response.data;
+  },
+  deleteAnnouncement: async (id: number) => {
+    const response = await api.delete(`/announcements/${id}`);
+    return response.data;
+  },
+};
+
 export default api;
