@@ -3,6 +3,7 @@
 
 import React from 'react'
 import { Menu, Search, User, Settings, LogOut } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { NavbarProps } from '@/types/layout'
 import NotificationButton from '@/components/notifications/NotificationButton'
@@ -11,6 +12,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 export default function Navbar({ onMenuClick }: NavbarProps) {
+  const { user, logout } = useAuth()
   const pathname = usePathname()
   const [isSearchFocused, setIsSearchFocused] = React.useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
@@ -95,8 +97,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                   <div className="p-2">
                     {/* User Info */}
                     <div className="px-4 py-2">
-                      <p className="text-sm font-semibold">John Doe</p>
-                      <p className="text-xs text-gray-500">john.doe@example.com</p>
+                      <p className="text-sm font-semibold">{user?.name || 'User'}</p>
+                      <p className="text-xs text-gray-500">{user?.email}</p>
                     </div>
                     
                     <div className="border-t my-1"></div>
@@ -124,9 +126,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
                     <button
                       className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
-                      onClick={() => {
+                      onClick={async () => {
                         setIsUserMenuOpen(false)
-                        // Add logout logic here
+                        await logout()
                       }}
                     >
                       <LogOut className="h-4 w-4 mr-2" />
