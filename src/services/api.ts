@@ -1,3 +1,6 @@
+// File: src/services/api.ts
+// API service configuration and endpoints
+
 import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
