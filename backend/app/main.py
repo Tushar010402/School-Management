@@ -1,3 +1,6 @@
+# File: backend/app/main.py
+# Main FastAPI application entry point
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse

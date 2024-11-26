@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { authAPI } from '@/services/api';
 import { jwtDecode } from 'jwt-decode';
 
