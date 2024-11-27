@@ -11,7 +11,7 @@ class User(BaseModel):
     email = Column(String, unique=True, nullable=False, index=True)
     hashed_password = Column(String, nullable=False)
     role = Column(SQLAlchemyEnum(UserRole), nullable=False)
-    is_active = Column(SQLAlchemyEnum(bool), default=True, nullable=False)
+    is_active = Column(SQLAlchemyEnum("true", "false", name="bool_enum"), default="true", nullable=False)
     
     # Relationships
     tenant = relationship("Tenant", back_populates="users")
