@@ -12,3 +12,10 @@ class School(BaseModel):
     
     # Relationships
     tenant = relationship("Tenant", back_populates="schools")
+    academic_years = relationship("AcademicYear", back_populates="school")
+    classes = relationship("Class", back_populates="school")
+    sections = relationship("Section", back_populates="school")
+    subjects = relationship("Subject", back_populates="school")
+    timetables = relationship("Timetable", back_populates="school")
+    grading_systems = relationship("GradingSystem", back_populates="school")
+    assessments = relationship("Assessment", back_populates="school")

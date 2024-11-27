@@ -39,7 +39,7 @@ class Timetable(BaseModel):
     start_time = Column(Time, nullable=False)
     end_time = Column(Time, nullable=False)
     room = Column(String, nullable=True)
-    is_active = Column(SQLAlchemyEnum(bool), default=True, nullable=False)
+    is_active = Column(SQLAlchemyEnum("true", "false", name="bool"), default="true", nullable=False)
     
     # Relationships
     school = relationship("School", back_populates="timetables")

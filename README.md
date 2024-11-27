@@ -78,26 +78,76 @@ git clone https://github.com/yourusername/school-management.git
 cd school-management
 ```
 
-2. Set up environment variables:
+2. Backend Setup:
 ```bash
-cp .env.example .env
-# Edit .env with your configurations
+# Create and activate virtual environment
+cd backend
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Create .env file
+cat > .env << EOL
+DATABASE_URL=postgresql://postgres:Tushar@098@34.131.42.0:5432/postgres
+ASYNC_DATABASE_URL=postgresql+asyncpg://postgres:Tushar@098@34.131.42.0:5432/postgres
+
+# Redis settings
+REDIS_URL=redis://localhost:6379/0
+
+# Security settings
+SECRET_KEY=your-secret-key-here-min-32-chars-long123
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# Email settings (optional)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+EOL
+
+# Install and start Redis
+sudo apt update
+sudo apt install -y redis-server
+sudo systemctl start redis-server
+
+# Run migrations
+PYTHONPATH=/path/to/School-Management/backend alembic upgrade head
+
+# Start backend server
+PYTHONPATH=/path/to/School-Management/backend uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-3. Start the services:
+3. Frontend Setup:
 ```bash
-docker-compose up --build
+# Install dependencies
+cd ..  # Back to project root
+npm install --legacy-peer-deps
+
+# Create .env.local file
+cat > .env.local << EOL
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_WEBSOCKET_URL=ws://localhost:8000/ws
+NEXT_PUBLIC_UPLOAD_URL=http://localhost:8000/uploads
+NEXT_PUBLIC_MAX_FILE_SIZE=5242880
+EOL
+
+# Start frontend development server
+npm run dev
 ```
 
-4. Run database migrations:
+4. Create initial superuser:
 ```bash
-docker-compose exec backend alembic upgrade head
+cd backend
+PYTHONPATH=/path/to/School-Management/backend python scripts/create_superuser.py
 ```
 
-5. Create initial superuser:
-```bash
-docker-compose exec backend python -m app.scripts.create_superuser
-```
+The application will be available at:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/docs
 
 ### Development Setup
 
