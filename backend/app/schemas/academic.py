@@ -1,8 +1,102 @@
 from pydantic import BaseModel, Field, validator
-from datetime import time
+from datetime import time, date
 from typing import Optional, List, Dict, Union
 from app.models.academic import WeekDay, GradeSystem, AssessmentType
 from app.schemas.base import TimestampSchema
+
+class AcademicYearBase(BaseModel):
+    name: str
+    start_date: date
+    end_date: date
+    is_active: Optional[bool] = True
+
+    @validator('end_date')
+    def end_date_must_be_after_start_date(cls, v, values):
+        if 'start_date' in values and v <= values['start_date']:
+            raise ValueError('end_date must be after start_date')
+        return v
+
+class AcademicYearCreate(AcademicYearBase):
+    school_id: int
+
+class AcademicYearUpdate(AcademicYearBase):
+    pass
+
+class AcademicYear(AcademicYearBase, TimestampSchema):
+    id: int
+    school_id: int
+
+class ClassBase(BaseModel):
+    academic_year_id: int
+    name: str
+    grade_level: int
+    is_active: Optional[bool] = True
+
+class ClassCreate(ClassBase):
+    school_id: int
+
+class ClassUpdate(ClassBase):
+    pass
+
+class Class(ClassBase, TimestampSchema):
+    id: int
+    school_id: int
+
+class SectionBase(BaseModel):
+    class_id: int
+    name: str
+    capacity: int
+    is_active: Optional[bool] = True
+
+class SectionCreate(SectionBase):
+    school_id: int
+
+class SectionUpdate(SectionBase):
+    pass
+
+class Section(SectionBase, TimestampSchema):
+    id: int
+    school_id: int
+
+class SubjectBase(BaseModel):
+    name: str
+    code: str
+    description: Optional[str] = None
+    credits: Optional[float] = None
+    is_active: Optional[bool] = True
+
+class SubjectCreate(SubjectBase):
+    school_id: int
+
+class SubjectUpdate(SubjectBase):
+    pass
+
+class Subject(SubjectBase, TimestampSchema):
+    id: int
+    school_id: int
+
+class StudentSectionBase(BaseModel):
+    student_id: int
+    section_id: int
+    roll_number: Optional[str] = None
+
+class StudentSectionCreate(StudentSectionBase):
+    pass
+
+class StudentSection(StudentSectionBase, TimestampSchema):
+    id: int
+
+class TeacherSectionBase(BaseModel):
+    teacher_id: int
+    section_id: int
+    subject_id: int
+    is_class_teacher: bool = False
+
+class TeacherSectionCreate(TeacherSectionBase):
+    pass
+
+class TeacherSection(TeacherSectionBase, TimestampSchema):
+    id: int
 
 class TimetableBase(BaseModel):
     class_id: int

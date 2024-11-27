@@ -2,9 +2,9 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc
 from fastapi import HTTPException, status
-from app.models.academic import (
+from app.models.academic_core import (
     AcademicYear, Class, Section, Subject,
-    StudentSection, TeacherSection, TeacherSubject
+    StudentSection, TeacherSection
 )
 from app.schemas.academic import (
     AcademicYearCreate, AcademicYearUpdate,
