@@ -11,7 +11,12 @@ from app.schemas.academic import (
     ClassCreate, ClassUpdate,
     SectionCreate, SectionUpdate,
     SubjectCreate, SubjectUpdate,
-    StudentSectionCreate, TeacherSectionCreate
+    StudentSectionCreate, TeacherSectionCreate,
+    TimetableCreate, TimetableUpdate,
+    GradingSystemCreate, GradingSystemUpdate,
+    AssessmentCreate, AssessmentUpdate,
+    ResultCreate, ResultUpdate,
+    TeacherNoteCreate, TeacherNoteUpdate
 )
 from app.core.cache import CacheService
 
@@ -412,3 +417,64 @@ def get_teacher_classes(
     cache.set(cache_key, result, ttl=300)  # Cache for 5 minutes
     
     return result
+
+# Subject CRUD
+def create_subject(db: Session, tenant_id: int, data: SubjectCreate) -> Subject:
+    db_obj = Subject(tenant_id=tenant_id, **data.model_dump())
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+def get_subject(db: Session, tenant_id: int, subject_id: int) -> Optional[Subject]:
+    cache_key = f"subject:{tenant_id}:{subject_id}"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return Subject(**cached_data)
+    
+    db_obj = db.query(Subject).filter(
+        and_(
+            Subject.tenant_id == tenant_id,
+            Subject.id == subject_id
+        )
+    ).first()
+    
+    if db_obj:
+        cache.set(cache_key, db_obj.__dict__, ttl=3600)
+    
+    return db_obj
+
+def get_subjects(
+    db: Session,
+    tenant_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    is_active: Optional[bool] = None
+) -> List[Subject]:
+    query = db.query(Subject).filter(Subject.tenant_id == tenant_id)
+    
+    if is_active is not None:
+        query = query.filter(Subject.is_active == is_active)
+    
+    return query.offset(skip).limit(limit).all()
+
+def update_subject(
+    db: Session,
+    tenant_id: int,
+    subject_id: int,
+    data: SubjectUpdate
+) -> Optional[Subject]:
+    db_obj = get_subject(db, tenant_id, subject_id)
+    if not db_obj:
+        return None
+    
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(db_obj, field, value)
+    
+    db.commit()
+    db.refresh(db_obj)
+    
+    # Invalidate cache
+    cache.delete(f"subject:{tenant_id}:{subject_id}")
+    
+    return db_obj
