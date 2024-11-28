@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum as SQLAlchemyEnum, Time, JSON
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum as SQLAlchemyEnum, Time, JSON, Boolean
 from sqlalchemy.orm import relationship
 from enum import Enum
 from datetime import time
@@ -39,7 +39,7 @@ class Timetable(BaseModel):
     start_time = Column(Time, nullable=False)
     end_time = Column(Time, nullable=False)
     room = Column(String, nullable=True)
-    is_active = Column(SQLAlchemyEnum("true", "false", name="bool"), default="true", nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
     
     # Relationships
     school = relationship("School", back_populates="timetables")
