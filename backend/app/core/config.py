@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     SMTP_USER: str = "test@example.com"
     SMTP_PASSWORD: str = "your-app-password"
     
+    # File storage settings
+    UPLOAD_DIR: str = "uploads"
+    MAX_UPLOAD_SIZE: int = 5242880
+    
     class Config:
         case_sensitive = True
         env_file = ".env"
