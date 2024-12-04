@@ -59,6 +59,20 @@ async def register(
     
     return {"message": "User created successfully", "user_id": user.id}
 
+@router.get("/me")
+async def get_current_user_info(current_user: User = Depends(get_current_user)) -> dict:
+    """
+    Get current user information
+    """
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "username": current_user.username,
+        "role": current_user.role,
+        "tenant_id": current_user.tenant_id,
+        "is_active": current_user.is_active
+    }
+
 @router.post("/logout")
 async def logout(current_user: User = Depends(get_current_user)) -> dict:
     """
