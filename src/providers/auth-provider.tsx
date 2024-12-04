@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+      const response = await fetch(`http://localhost:8000/api/v1/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const response = await fetch(`http://localhost:8000/api/v1/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
       localStorage.setItem('token', data.access_token);
       
-      const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+      const userResponse = await fetch(`http://localhost:8000/api/v1/auth/me`, {
         headers: {
           Authorization: `Bearer ${data.access_token}`,
         },
@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+        await fetch(`http://localhost:8000/api/v1/auth/logout`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
