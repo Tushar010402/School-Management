@@ -1,11 +1,11 @@
 from enum import Enum
 
 class UserRole(str, Enum):
-    SUPER_ADMIN = "super_admin"
-    SCHOOL_ADMIN = "school_admin"
-    TEACHER = "teacher"
-    STUDENT = "student"
-    PARENT = "parent"
+    SUPER_ADMIN = "SUPER_ADMIN"
+    SCHOOL_ADMIN = "SCHOOL_ADMIN"
+    TEACHER = "TEACHER"
+    STUDENT = "STUDENT"
+    PARENT = "PARENT"
 
 # Role hierarchy for permission checking
 ROLE_HIERARCHY = {
