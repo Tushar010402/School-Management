@@ -10,7 +10,9 @@ from app.core.config import get_settings
 from app.api.deps import get_db
 from app.models.user import User
 from app.models.enums import UserRole, ROLE_HIERARCHY
-from app.services.auth import check_permission
+# Moved check_permission here to avoid circular imports
+def check_permission(required_role: UserRole, user_role: UserRole) -> bool:
+    return ROLE_HIERARCHY[user_role] >= ROLE_HIERARCHY[required_role]
 
 settings = get_settings()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

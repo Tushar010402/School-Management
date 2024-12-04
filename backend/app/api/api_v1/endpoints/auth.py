@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.core.security import get_current_user, require_school_admin
-from app.schemas.auth import Token, RegisterUser
+from app.schemas.auth import Token, RegisterUser, Login
 from app.services.auth import authenticate_user, create_access_token, create_user
 from app.models.user import User
 
@@ -12,19 +12,31 @@ router = APIRouter()
 
 @router.post("/login", response_model=Token)
 async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    login_data: Login,
     db: Session = Depends(get_db)
 ) -> Token:
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
+    try:
+        user = authenticate_user(db, login_data.email, login_data.password)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        if user.is_active != "true":  # SQLite enum value
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User account is inactive",
+            )
+        
+        access_token = create_access_token(user)
+        return Token(access_token=access_token, token_type="bearer")
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
         )
-    
-    access_token = create_access_token(user)
-    return Token(access_token=access_token)
 
 @router.post("/register", response_model=None)
 async def register(

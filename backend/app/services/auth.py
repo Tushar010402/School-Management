@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from jose import jwt
 
 from app.core.config import get_settings
-from app.core.auth import get_password_hash, verify_password
+from app.core.security import get_password_hash, verify_password
 from app.models.user import User
 from app.models.enums import UserRole, ROLE_HIERARCHY
 from app.schemas.auth import TokenData
@@ -13,10 +13,22 @@ from app.schemas.auth import TokenData
 settings = get_settings()
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
-    user = db.query(User).filter(User.email == email).first()
-    if not user or not verify_password(password, user.hashed_password):
+    try:
+        print(f"Attempting to authenticate user: {email}")
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            print("User not found")
+            return None
+        
+        print(f"Found user: {user.email}, role: {user.role}, is_active: {user.is_active}")
+        if not verify_password(password, user.hashed_password):
+            print("Invalid password")
+            return None
+            
+        return user
+    except Exception as e:
+        print(f"Authentication error: {str(e)}")
         return None
-    return user
 
 def create_access_token(user: User) -> str:
     token_data = TokenData(
