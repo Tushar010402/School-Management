@@ -25,27 +25,40 @@ def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
             print("Invalid password")
             return None
             
+        # Convert numeric is_active to string if needed
+        if isinstance(user.is_active, int):
+            user.is_active = "true" if user.is_active == 1 else "false"
+            
         return user
     except Exception as e:
         print(f"Authentication error: {str(e)}")
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
 
 def create_access_token(user: User) -> str:
-    token_data = TokenData(
-        user_id=user.id,
-        tenant_id=user.tenant_id,
-        role=user.role
-    )
-    
-    expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode = {
-        "exp": expire,
-        "sub": str(token_data.user_id),
-        "tenant_id": token_data.tenant_id,
-        "role": token_data.role
-    }
-    
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    try:
+        token_data = TokenData(
+            user_id=user.id,
+            tenant_id=user.tenant_id,
+            role=user.role
+        )
+        
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        to_encode = {
+            "exp": expire,
+            "sub": str(token_data.user_id),
+            "tenant_id": token_data.tenant_id,
+            "role": token_data.role
+        }
+        
+        return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating access token: {str(e)}"
+        )
 
 def create_user(
     db: Session,
@@ -57,40 +70,50 @@ def create_user(
     tenant_id: int,
     created_by_role: UserRole
 ) -> User:
-    # Check if the creating user has sufficient privileges
-    if ROLE_HIERARCHY[created_by_role] <= ROLE_HIERARCHY[role]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient privileges to create user with this role"
+    try:
+        # Check if the creating user has sufficient privileges
+        if ROLE_HIERARCHY[created_by_role] <= ROLE_HIERARCHY[role]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient privileges to create user with this role"
+            )
+        
+        # Check if email already exists
+        if db.query(User).filter(User.email == email).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+        
+        # Check if username already exists
+        if db.query(User).filter(User.username == username).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken"
+            )
+        
+        user = User(
+            email=email,
+            username=username,
+            hashed_password=get_password_hash(password),
+            role=role,
+            tenant_id=tenant_id,
+            is_active="true"  # Explicitly set as string
         )
-    
-    # Check if email already exists
-    if db.query(User).filter(User.email == email).first():
+        
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating user: {str(e)}"
         )
-    
-    # Check if username already exists
-    if db.query(User).filter(User.username == username).first():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already taken"
-        )
-    
-    user = User(
-        email=email,
-        username=username,
-        hashed_password=get_password_hash(password),
-        role=role,
-        tenant_id=tenant_id
-    )
-    
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    
-    return user
 
 def check_permission(required_role: UserRole, user_role: UserRole) -> bool:
     return ROLE_HIERARCHY[user_role] >= ROLE_HIERARCHY[required_role]

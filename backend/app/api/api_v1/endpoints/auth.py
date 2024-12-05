@@ -24,7 +24,11 @@ async def login(
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        if user.is_active != "true":  # SQLite enum value
+        # Convert string "true" or "1" to boolean
+        is_active = user.is_active.lower() in ("true", "1")
+        print(f"Debug - is_active value: {user.is_active}, converted to: {is_active}")
+        
+        if not is_active:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User account is inactive",
@@ -33,6 +37,9 @@ async def login(
         access_token = create_access_token(user)
         return Token(access_token=access_token, token_type="bearer")
     except Exception as e:
+        print(f"Login error: {str(e)}")
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
