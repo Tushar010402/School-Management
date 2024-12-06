@@ -1,15 +1,15 @@
 // src/components/layout/Navbar.tsx
-'use client'
+'use client';
 
-import React from 'react'
-import { Menu, Search, User, Settings, LogOut } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
-import { Button } from '@/components/ui/button'
-import { NavbarProps } from '@/types/layout'
-import NotificationButton from '@/components/notifications/NotificationButton'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
+import React from 'react';
+import { Menu, Search, User, Settings, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';  // Updated import path
+import { Button } from '@/components/ui/button';
+import { NavbarProps } from '@/types/layout';
+import NotificationButton from '@/components/notifications/NotificationButton';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export default function Navbar({ onMenuClick }: NavbarProps) {
   const { user, logout } = useAuth()

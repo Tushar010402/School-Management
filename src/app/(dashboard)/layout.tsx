@@ -2,6 +2,7 @@
 'use client'
 
 import DashboardLayout from '@/components/layout/DashboardLayout'
+import { useAuth } from '@/contexts/AuthContext';  
 
 export default function DashboardLayoutWrapper({
   children,
